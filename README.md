@@ -16,3 +16,8 @@ Machine learning algorithms built from scratch with all their moving parts expos
 ### Data:
 - TODO: adaptor interface to feed data to algorithms
 
+## Results
+
+Using sigmoid with its derivatives performs about as well as using sigmoid with derivatives of noFunc
+
+(Tested on logical AND)
