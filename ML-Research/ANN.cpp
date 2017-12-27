@@ -1,13 +1,14 @@
 #include "ANN.h"
 #include<math.h>
 
-ANN::ANN(const std::vector<size_t>& layerSizes) 
-	:_layerSizes(layerSizes), 
+ANN::ANN(const std::vector<size_t>& layerSizes)
+	:_layerSizes(layerSizes),
 	_curLayer(0),
 	_layers(_layerSizes.size()),
-	_weights(_layerSizes.size()-1), 
-	_biases(_layerSizes.size()-1)
+	_weights(_layerSizes.size() - 1),
+	_biases(_layerSizes.size() - 1)
 {
+	activationFunc = &noFunc; // TODO: is this the right place for initializing function pointers?
 	for (size_t layer = 0; layer < layerSizes.size()-1; layer++) {
 		_weights[layer] = Matrix_t::Zero(layerSizes[layer+1], layerSizes[layer]);
 	}
@@ -26,14 +27,5 @@ void ANN::setInput(const Vector_t& input) {
 }
 
 void ANN::processLayer(size_t layer) {
-	_layers[layer + 1] = _weights[layer] * _layers[layer] + Vector_t::Constant(_layerSizes[layer + 1], _biases[layer]);
-	_layers[layer + 1] = sigmoid(_layers[layer + 1]);
-}
-
-ANN::Vector_t ANN::sigmoid(const Vector_t& vec) {
-	Vector_t ret = vec;
-	for (auto coeff = 0; coeff < vec.size(); coeff++) {
-		ret[coeff] = 1 / (std::exp(-vec[coeff]) + 1);
-	}
-	return ret;
+	_layers[layer + 1] = activationFunc(prepLayerAfter(layer));
 }
