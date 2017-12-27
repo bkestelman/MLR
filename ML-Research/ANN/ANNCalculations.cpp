@@ -40,21 +40,13 @@ ANN::Vector_t ANN::noFunc(const Vector_t& vec) {
 ANN::val_t ANN::noFunc_dn_db(const Vector_t& n, size_t node) {
 	return 1;
 }
-ANN::val_t ANN::dn_db_f(const Vector_t& n, size_t node) {
-	return (*this.*dn_db_fp)(n, node);
-}
 ANN::val_t ANN::noFunc_dn_dw(const Vector_t& n, size_t node, val_t nodeBefore) {
 	return nodeBefore;
-}
-ANN::val_t ANN::dn_dw_f(const Vector_t& n, size_t node, val_t nodeBefore) {
-	return (*this.*dn_dw_fp)(n, node, nodeBefore);
 }
 ANN::val_t ANN::noFunc_dN_dn(const Vector_t& n, size_t nextLayerNode, val_t weightBetween) {
 	return weightBetween;
 }
-ANN::val_t ANN::dN_dn_f(const Vector_t& n, size_t nextLayerNode, val_t weightBetween) {
-	return (*this.*dN_dn_fp)(n, nextLayerNode, weightBetween);
-}
+
 
 /* Derivative of Square Difference Error Function with respect to each output node value (dE_dn) */
 ANN::Vector_t ANN::output_dE_dn(const Vector_t& output, const Vector_t& label) {
