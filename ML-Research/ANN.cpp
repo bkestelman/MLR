@@ -6,9 +6,13 @@ ANN::ANN(const std::vector<size_t>& layerSizes)
 	_curLayer(0),
 	_layers(_layerSizes.size()),
 	_weights(_layerSizes.size() - 1),
-	_biases(_layerSizes.size() - 1)
+	_biases(_layerSizes.size() - 1),
+	activationFunc(&sigmoid),
+	dn_db_fp(&ANN::sigmoid_dn_db),
+	dn_dw_fp(&ANN::sigmoid_dn_dw),
+	dN_dn_fp(&ANN::sigmoid_dN_dn)
 {
-	activationFunc = &noFunc; // TODO: is this the right place for initializing function pointers?
+	//activationFunc = &noFunc; // TODO: is this the right place for initializing function pointers?
 	for (size_t layer = 0; layer < layerSizes.size()-1; layer++) {
 		_weights[layer] = Matrix_t::Zero(layerSizes[layer+1], layerSizes[layer]);
 	}

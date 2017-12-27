@@ -51,7 +51,22 @@ private:
 	Vector_t prepLayerAfter(size_t nodeLayer);
 	static Vector_t sigmoid(const Vector_t& vec);
 	static val_t sigmoid(val_t val);
+	val_t sigmoid_dn_db(const Vector_t& nodes, size_t node);
+	val_t sigmoid_dn_dw(const Vector_t& n, size_t node, val_t nodeBefore);
+	val_t sigmoid_dN_dn(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
+	//static val_t sigmoid_dn_dw(const Vector_t& nodes, size_t node);
 	static Vector_t noFunc(const Vector_t& vec);
-	Vector_t(*activationFunc)(const Vector_t&);
+	val_t noFunc_dn_db(const Vector_t& n, size_t node);
+	val_t noFunc_dn_dw(const Vector_t& n, size_t node, val_t nodeBefore);
+	val_t noFunc_dN_dn(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
+	Vector_t(*activationFunc)(const Vector_t&); // TODO: test why this initialization works here but not for dn_db_fp
+	//val_t(*dn_dwF)(const Vector_t& nodes, size_t node);
+	val_t(ANN::*dn_db_fp)(const Vector_t&, size_t);
+	val_t(ANN::*dn_dw_fp)(const Vector_t& n, size_t node, val_t nodeBefore);
+	val_t(ANN::*dN_dn_fp)(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
+	val_t dn_db_f(const Vector_t& n, size_t node);
+	val_t dn_dw_f(const Vector_t& n, size_t node, val_t nodeBefore);
+	val_t dN_dn_f(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
+	//val_t(*dN_dnF)();
 	Vector_t output_dE_dn(const Vector_t& output, const Vector_t& label);
 };

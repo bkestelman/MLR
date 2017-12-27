@@ -27,10 +27,10 @@ void ANN::adjustWeights(size_t weightLayer, const Vector_t& backpropagated_dE_dn
 																   using only the classic weighted average */
 	for (auto row = 0; row < _weights[weightLayer].rows(); row++) {
 		for (auto col = 0; col < _weights[weightLayer].cols(); col++) {
-			double expo = std::exp(-n[row]);
-			double dn_dw = nodeValBefore(weightLayer, row, col);
+			//val_t expo = std::exp(-n[row]);
+			val_t dn_dw = dn_dw_f(n, row, nodeValBefore(weightLayer, row, col));
 			/*double dn_dw = (expo + 1)*expo*nodeValBefore(weightLayer, row, col); /* change in nodeAfter, caused by changing weight */
-			double dE_dw = dn_dw * backpropagated_dE_dn[row]; /* chain rule */
+			val_t dE_dw = dn_dw * backpropagated_dE_dn[row]; /* chain rule */
 			_weights[weightLayer](row, col) -= dE_dw * _stepFactor;
 		}
 	}
@@ -39,11 +39,13 @@ void ANN::adjustWeights(size_t weightLayer, const Vector_t& backpropagated_dE_dn
 void ANN::adjustBiases(size_t weightLayer, const Vector_t& backpropagated_dE_dn) {
 	//Vector_t n = calculateLayerAfter(nodeLayerBefore(weightLayer));
 	Vector_t n = _layers[nodeLayerAfter(weightLayer)];
-	double dE_db = 0;
+	val_t dE_db = 0;
 	for (auto node = 0; node < _layers[nodeLayerAfter(weightLayer)].size(); node++) {
 		//double expo = std::exp(-n[node]);
-		double dn_db = 1;
+		val_t dn_db = dn_db_f(n, node);
+		//val_t dn_db = 1;
 		//double dn_db = (expo + 1)*expo;
+		//dn_db = dn_dbF(n);
 		dE_db += dn_db * backpropagated_dE_dn[node];
 	}
 	_biases[weightLayer] -= dE_db * _stepFactor;
@@ -56,10 +58,10 @@ ANN::Vector_t ANN::backprop_dE_dn(size_t weightLayer, const Vector_t& backpropag
 	//Vector_t n = prepLayerAfter(nodeLayer);
 	Vector_t n = _layers[nodeLayerAfterWeights];
 	for (auto node = 0; node < _layers[nodeLayerBeforeWeights].size(); node++) {
-		double dE_dn = 0; 
+		val_t dE_dn = 0; 
 		for (auto nextLayerNode = 0; nextLayerNode < _layers[nodeLayerAfterWeights].size(); nextLayerNode++) {
-			double expo = std::exp(-n[nextLayerNode]);
-			double dN_dn = weight(weightLayer, node, nextLayerNode);
+			val_t expo = std::exp(-n[nextLayerNode]);
+			val_t dN_dn = dN_dn_f(n, nextLayerNode, weight(weightLayer, node, nextLayerNode)); // TODO: fp
 			/*double dN_dn = (expo + 1)*expo*weight(weightLayerAfter(nodeLayer), node, nextLayerNode); /* deriv of next node (N)
 																									 w/ respect to node (assuming sigmoid) */
 			dE_dn += dN_dn * backpropagated_dE_dn[nextLayerNode]; /* chain rule */
