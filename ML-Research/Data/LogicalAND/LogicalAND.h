@@ -1,14 +1,18 @@
 #pragma once
-#include "ANN\ANN.h"
 #include "Data\DataReader.h"
 
-class LogicalAND : DataReader {
+class ANN;
+class LogicalAND : public DataReader {
 public:
 	LogicalAND::LogicalAND();
-	ANN::Vector_t readData() override;
-	ANN::Vector_t readLabel() override;
+	DataReader::Vector_t readData() override;
+	DataReader::Vector_t readLabel() override;
+	const size_t dataSize() override;
+	const size_t labelSize() override;
+	const void testAssertions(const ANN& ann) override;
 private:
-	ANN::Vector_t data;
-	ANN::Vector_t label;
+	DataReader::Vector_t data;
+	DataReader::Vector_t label;
 	void generateDataAndLabel();
+
 };

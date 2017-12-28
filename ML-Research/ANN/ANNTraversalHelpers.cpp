@@ -24,3 +24,4 @@ std::size_t ANN::lastWeightLayer() {
 size_t ANN::outputLayer() {
 	return _layers.size() - 1;
 }
+

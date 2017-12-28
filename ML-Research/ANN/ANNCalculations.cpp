@@ -8,6 +8,18 @@ ANN::Vector_t ANN::prepLayerAfter(size_t nodeLayer) {
 	return _weights[nodeLayer] * _layers[nodeLayer] + Vector_t::Constant(_layerSizes[nodeLayer + 1], _biases[nodeLayer]);
 }
 
+ANN::Vector_t ANN::normalize(const Vector_t& vec) {
+	double tot = 0;
+	for (int i = 0; i < vec.size(); i++) {
+		tot += vec[i];
+	}
+	Vector_t normalizedVec(vec);
+	for (int i = 0; i < vec.size(); i++) {
+		normalizedVec[i] /= tot;
+	}
+	return normalizedVec;
+}
+
 /* Coefficient wise sigmoid on vector */
 ANN::Vector_t ANN::sigmoid(const Vector_t& vec) {
 	Vector_t ret = vec;

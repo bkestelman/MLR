@@ -2,24 +2,40 @@
 #include<vector>
 #include<iostream>
 #include<Eigen\Dense>
+#include "Data\DataReader.h"
+#include "Data\LogicalAND\LogicalAND.h"
+#include "Data\MNISTReader\MNISTReader.h"
 
+//class LogicalAND;
+//class MNISTReader;
 class ANN {
 public:
 	using Matrix_t = Eigen::MatrixXd;
 	using Vector_t = Eigen::VectorXd;
 	using val_t = double;
+	using data_t = int; /* Move to DataReader or use <> */
 
 	explicit ANN(const std::vector<size_t>& layerSizes);
+	explicit ANN(DataReader& dr); /* ANN based off DataReader with no hidden layers */
 
-	Vector_t& train(const Vector_t& input, const Vector_t& label);
-	Vector_t& processInput(const Vector_t& input);
+	Vector_t& train();
+	Vector_t& processInput();
+	Vector_t& inputs();
+	Vector_t& label();
+	void readNext();
 
 	/* ANN Operator Overloads */
 	friend std::ostream& operator<<(std::ostream& os, const ANN& ann);
 
+	friend const void LogicalAND::testAssertions(const ANN&);
+	friend const void MNISTReader::testAssertions(const ANN&);
+
 private:
+	DataReader& _dr;
+	Vector_t _input; /* TODO: set */
+	Vector_t _label;
 	bool _simultaneousChanges{ true };
-	val_t _stepFactor{ 0.1 };
+	val_t _stepFactor{ 0.01 };
 	const std::vector<size_t> _layerSizes;
 	std::vector<Vector_t> _layers;
 	int _curLayer;
@@ -49,6 +65,7 @@ private:
 	/* ANN Calculations */
 	Vector_t prepLayerAfter(size_t nodeLayer);
 	Vector_t output_dE_dn(const Vector_t& output, const Vector_t& label);
+	Vector_t normalize(const Vector_t& vec);
 	/* Sigmoid */
 	static Vector_t sigmoid(const Vector_t& vec);
 	static val_t sigmoid(val_t val);
@@ -69,4 +86,6 @@ private:
 	val_t dn_db_f(const Vector_t& n, size_t node);
 	val_t dn_dw_f(const Vector_t& n, size_t node, val_t nodeBefore);
 	val_t dN_dn_f(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
+
+
 };
