@@ -23,6 +23,7 @@ public:
 	Vector_t& inputs();
 	Vector_t& label();
 	void readNext();
+	void insertLayer(size_t size);
 
 	/* ANN Operator Overloads */
 	friend std::ostream& operator<<(std::ostream& os, const ANN& ann);
@@ -35,7 +36,7 @@ private:
 	Vector_t _input; /* TODO: set */
 	Vector_t _label;
 	bool _simultaneousChanges{ true };
-	val_t _stepFactor{ 0.01 };
+	val_t _stepFactor{ 1 };
 	const std::vector<size_t> _layerSizes;
 	std::vector<Vector_t> _layers;
 	int _curLayer;
@@ -65,7 +66,8 @@ private:
 	/* ANN Calculations */
 	Vector_t prepLayerAfter(size_t nodeLayer);
 	Vector_t output_dE_dn(const Vector_t& output, const Vector_t& label);
-	Vector_t normalize(const Vector_t& vec);
+	void normalize(Vector_t& vec);
+	void scale(Vector_t& vec);
 	/* Sigmoid */
 	static Vector_t sigmoid(const Vector_t& vec);
 	static val_t sigmoid(val_t val);

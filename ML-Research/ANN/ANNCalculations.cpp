@@ -8,16 +8,35 @@ ANN::Vector_t ANN::prepLayerAfter(size_t nodeLayer) {
 	return _weights[nodeLayer] * _layers[nodeLayer] + Vector_t::Constant(_layerSizes[nodeLayer + 1], _biases[nodeLayer]);
 }
 
-ANN::Vector_t ANN::normalize(const Vector_t& vec) {
-	double tot = 0;
-	for (int i = 0; i < vec.size(); i++) {
-		tot += vec[i];
+void ANN::scale(Vector_t& vec) {
+	//assert(false);
+	assert(vec.size() > 0);
+	val_t max = vec[0];
+	for (auto i = 0; i < vec.size(); i++) {
+		if (vec[i] > max) max = vec[i]; /* TODO: account for negatives */
 	}
+	if (max == 0) return;
+	for (auto i = 0; i < vec.size(); i++) {
+		vec[i] /= max;
+		assert(vec[i] <= 1 && vec[i] >= -1); 
+	}
+}
+
+void ANN::normalize(Vector_t& vec) {
+	assert(false); 
+	assert(vec.size() > 0);
+	double range = 0;
+	double max = vec[0];
+	double min = vec[0];
+	for (auto i = 0; i < vec.size(); i++) {
+		if (vec[i] > max) max = vec[i];
+		else if (vec[i] < min) min = vec[i];
+	}
+	if (max == min) return;
 	Vector_t normalizedVec(vec);
-	for (int i = 0; i < vec.size(); i++) {
-		normalizedVec[i] /= tot;
+	for (auto i = 0; i < vec.size(); i++) {
+		vec[i] /= (max - min);
 	}
-	return normalizedVec;
 }
 
 /* Coefficient wise sigmoid on vector */

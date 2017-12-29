@@ -1,8 +1,14 @@
 #pragma once
-#include "ANN\ANN.h"
+#include<Eigen\Dense>
 
+class ANN;
 class DataReader {
 public:
-	virtual ANN::Vector_t readData() = 0;
-	virtual ANN::Vector_t readLabel() = 0;
+	using Vector_t = Eigen::VectorXd;
+
+	virtual Vector_t readData() = 0;
+	virtual Vector_t readLabel() = 0;
+	virtual const size_t dataSize() = 0;
+	virtual const size_t labelSize() = 0;
+	virtual const void testAssertions(const ANN&) = 0;
 };

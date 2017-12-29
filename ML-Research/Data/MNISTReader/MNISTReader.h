@@ -31,5 +31,7 @@ private:
 	int labelFileToRead();
 
 	int itemsRead;
+
+	std::ofstream log;
 };
 

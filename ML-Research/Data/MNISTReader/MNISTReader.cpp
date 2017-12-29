@@ -30,7 +30,8 @@ static const int TRAIN_LABELS_FILE = 2;
 static const int TEST_LABELS_FILE = 3;
 
 MNISTReader::MNISTReader() :
-	itemsRead(0)
+	itemsRead(0),
+	log("mnist.log")
 {
 	setupFilenames();
 	setupHeaderCounts();
@@ -38,22 +39,41 @@ MNISTReader::MNISTReader() :
 	readHeaders();
 }
 
-ANN::Vector_t MNISTReader::readData() {
+DataReader::Vector_t MNISTReader::readData() {
 	int f = imageFileToRead();
-	int length = MNISTFiles[f].imageWidth * MNISTFiles[f].imageHeight;
+	MNISTFile& file = MNISTFiles[f];
+	int length = file.imageWidth * file.imageHeight;
+	assert(length == dataSize());
 	char* bytes = (char*)malloc(length);
-	MNISTFiles[f].fstream.read(bytes, length);
-	ANN::Vector_t data(length);
+	file.fstream.read(bytes, length);
+	assert(!file.fstream.eof());
+	assert(!file.fstream.bad());
+	assert(!file.fstream.fail());
+	assert(file.fstream.gcount() == length);
+	/*for (int i = 0; i < length; i++) {
+		file.fstream.read(bytes, 1);
+		log << "i : " << i << "\ngcount: " << file.fstream.gcount() << "\n";
+		if (file.fstream.fail()) log << "fail\n";
+		if (file.fstream.eof()) log << "eof\n";
+		if (file.fstream.bad()) log << "bad\n";
+		//char* error = (char*)malloc(strerrorlen_s(errno));
+		//log << "Error: " << strerror(errno) << "\n";
+	}*/
+	//assert(MNISTFiles[f].fstream.gcount() == length);
+	DataReader::Vector_t data(length);
 	for (int byte = 0; byte < length; byte++) {
 		int x = (unsigned char)bytes[byte];
+		log << x << "\n";
 		assert(x >= 0 && x <= 255);
 		data[byte] = x;
 	}
+
+	log << data;
 	free(bytes);
 	return data;
 }
 
-ANN::Vector_t MNISTReader::readLabel() {
+DataReader::Vector_t MNISTReader::readLabel() {
 	int f = labelFileToRead();
 	char* byte = (char*)malloc(1);
 	MNISTFiles[f].fstream.read(byte, 1);
@@ -92,7 +112,7 @@ void MNISTReader::setupHeaderCounts() {
 
 void MNISTReader::openStreams() {
 	for (int f = 0; f < MNISTFileCount; f++) {
-		MNISTFiles[f].fstream = std::ifstream(baseDir + MNISTFiles[f].filename);
+		MNISTFiles[f].fstream = std::ifstream(baseDir + MNISTFiles[f].filename, std::ios::binary);
 		assert(MNISTFiles[f].fstream.is_open());
 	}
 }
@@ -139,7 +159,7 @@ void MNISTReader::readHeaders(MNISTFile& file) {
 }
 
 const size_t MNISTReader::dataSize() {
-	return 784; /* TODO: rely on a const instead */
+	return 28*28; /* TODO: rely on a const instead */
 }
 
 const size_t MNISTReader::labelSize() {

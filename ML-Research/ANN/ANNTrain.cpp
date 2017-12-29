@@ -1,6 +1,7 @@
 #include "ANN.h"
 
 ANN::Vector_t& ANN::train() {
+	scale(_input);
 	backprop(processInput(), _label);
 	return _layers[outputLayer()];
 }
@@ -30,16 +31,32 @@ ANN::Vector_t ANN::backpropLayer(size_t weightLayer, const Vector_t& backpropaga
 
 void ANN::adjustWeights(size_t weightLayer, const Vector_t& backpropagated_dE_dn) {
 	Vector_t n = _layers[nodeLayerAfter(weightLayer)];
+	Matrix_t deltas = Matrix_t::Zero(_weights[weightLayer].rows(), _weights[weightLayer].cols());
+	val_t totalDelta = 0;
 	for (auto row = 0; row < _weights[weightLayer].rows(); row++) {
+		val_t rowDelta = 0;
 		for (auto col = 0; col < _weights[weightLayer].cols(); col++) {
 			val_t dn_dw = dn_dw_f(n, row, nodeValBefore(weightLayer, row, col));
 			val_t dE_dw = dn_dw * backpropagated_dE_dn[row]; /* chain rule */
-			_weights[weightLayer](row, col) -= dE_dw * _stepFactor;
+			deltas(row, col) = dE_dw;
+			//assert(deltas(row, col) != deltas(0, 0));
+			rowDelta += dE_dw;
+		}
+		for (auto col = 0; col < _weights[weightLayer].cols(); col++) {
+			if (rowDelta != 0) _weights[weightLayer](row, col) -= deltas(row, col) * _stepFactor;// / abs(rowDelta);
 		}
 	}
+	/*
+	for (auto row = 0; row < _weights[weightLayer].rows(); row++) {
+		for (auto col = 0; col < _weights[weightLayer].cols(); col++) {
+			_weights[weightLayer](row, col) -= deltas(row, col) * _stepFactor;
+		}
+	}
+	*/
 }
 
 void ANN::adjustBiases(size_t weightLayer, const Vector_t& backpropagated_dE_dn) {
+	return;
 	Vector_t n = _layers[nodeLayerAfter(weightLayer)];
 	val_t dE_db = 0;
 	for (auto node = 0; node < _layers[nodeLayerAfter(weightLayer)].size(); node++) {
