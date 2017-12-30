@@ -39,46 +39,6 @@ void ANN::normalize(Vector_t& vec) {
 	}
 }
 
-/* Coefficient wise sigmoid on vector */
-ANN::Vector_t ANN::sigmoid(const Vector_t& vec) {
-	Vector_t ret = vec;
-	for (auto coeff = 0; coeff < vec.size(); coeff++) {
-		ret[coeff] = sigmoid(vec[coeff]);
-	}
-	return ret;
-}
-ANN::val_t ANN::sigmoid(val_t val) {
-	return 1 / (std::exp(-val) + 1);
-}
-ANN::val_t ANN::sigmoid_dn_db(const Vector_t& n, size_t node) {
-	val_t expo = std::exp(-n[node]);
-	return (expo + 1)*expo;
-}
-ANN::val_t ANN::sigmoid_dn_dw(const Vector_t& n, size_t node, val_t nodeBefore) {
-	val_t expo = std::exp(-n[node]);
-	return (expo + 1)*expo*nodeBefore;
-}
-ANN::val_t ANN::sigmoid_dN_dn(const Vector_t& n, size_t nextLayerNode, val_t weightBetween) {
-	val_t expo = std::exp(-n[nextLayerNode]);
-	return (expo + 1)*expo*weightBetween;
-}
-
-
-/* No activation function */
-ANN::Vector_t ANN::noFunc(const Vector_t& vec) {
-	return vec;
-}
-ANN::val_t ANN::noFunc_dn_db(const Vector_t& n, size_t node) {
-	return 1;
-}
-ANN::val_t ANN::noFunc_dn_dw(const Vector_t& n, size_t node, val_t nodeBefore) {
-	return nodeBefore;
-}
-ANN::val_t ANN::noFunc_dN_dn(const Vector_t& n, size_t nextLayerNode, val_t weightBetween) {
-	return weightBetween;
-}
-
-
 /* Derivative of Square Difference Error Function with respect to each output node value (dE_dn) */
 ANN::Vector_t ANN::output_dE_dn(const Vector_t& output, const Vector_t& label) {
 	Vector_t dE_dn{ output.size() };

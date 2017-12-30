@@ -5,38 +5,48 @@
 #include "Data\DataReader.h"
 #include "Data\LogicalAND\LogicalAND.h"
 #include "Data\MNISTReader\MNISTReader.h"
+#include "MLMath.h"
 
-//class LogicalAND;
-//class MNISTReader;
 class ANN {
 public:
 	using Matrix_t = Eigen::MatrixXd;
 	using Vector_t = Eigen::VectorXd;
 	using val_t = double;
-	using data_t = int; /* Move to DataReader or use <> */
+	using data_t = int; /* Move to DataReader or use <> (TODO: what is this?) */
+
+	struct Params { /* Set ANN parameters. Leave default when uncertain */
+		val_t _stepFactor{ 1 };
+
+		/* Activation Function and Derivatives */
+		Vector_t(*activationFunc)(const Vector_t&) { &MLMath::sigmoid };
+		val_t(*dn_db)(const Vector_t&, size_t) { &MLMath::noFunc_dn_db };
+		val_t(*dn_dw)(const Vector_t& n, size_t node, val_t nodeBefore) { &MLMath::noFunc_dn_dw };
+		val_t(*dN_dn)(const Vector_t& n, size_t nextLayerNode, val_t weightBetween) { &MLMath::noFunc_dN_dn };
+	};
+	Params _params;
 
 	explicit ANN(const std::vector<size_t>& layerSizes);
 	explicit ANN(DataReader& dr); /* ANN based off DataReader with no hidden layers */
+	explicit ANN(DataReader& dr, Params& params);	
 
 	Vector_t& train();
 	Vector_t& processInput();
-	Vector_t& inputs();
-	Vector_t& label();
+	Vector_t& const inputs();
+	Vector_t& const label();
 	void readNext();
 	void insertLayer(size_t size);
 
 	/* ANN Operator Overloads */
 	friend std::ostream& operator<<(std::ostream& os, const ANN& ann);
 
-	friend const void LogicalAND::testAssertions(const ANN&);
+	friend const void LogicalAND::testAssertions(const ANN&); /* TODO: check position of const */
 	friend const void MNISTReader::testAssertions(const ANN&);
 
 private:
 	DataReader& _dr;
-	Vector_t _input; /* TODO: set */
+	Vector_t _input;
 	Vector_t _label;
-	bool _simultaneousChanges{ true };
-	val_t _stepFactor{ 1 };
+	//bool _simultaneousChanges{ true };
 	const std::vector<size_t> _layerSizes;
 	std::vector<Vector_t> _layers;
 	int _curLayer;
@@ -66,28 +76,6 @@ private:
 	/* ANN Calculations */
 	Vector_t prepLayerAfter(size_t nodeLayer);
 	Vector_t output_dE_dn(const Vector_t& output, const Vector_t& label);
-	void normalize(Vector_t& vec);
+	void normalize(Vector_t& vec); /* TODO: Move to MLMath, return Vector_t */
 	void scale(Vector_t& vec);
-	/* Sigmoid */
-	static Vector_t sigmoid(const Vector_t& vec);
-	static val_t sigmoid(val_t val);
-	val_t sigmoid_dn_db(const Vector_t& nodes, size_t node);
-	val_t sigmoid_dn_dw(const Vector_t& n, size_t node, val_t nodeBefore);
-	val_t sigmoid_dN_dn(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
-	/* NoFunc */
-	static Vector_t noFunc(const Vector_t& vec);
-	val_t noFunc_dn_db(const Vector_t& n, size_t node);
-	val_t noFunc_dn_dw(const Vector_t& n, size_t node, val_t nodeBefore);
-	val_t noFunc_dN_dn(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
-
-	/* ANN Function Pointers and Wrappers */
-	Vector_t(*activationFunc)(const Vector_t&); 
-	val_t(ANN::*dn_db_fp)(const Vector_t&, size_t);
-	val_t(ANN::*dn_dw_fp)(const Vector_t& n, size_t node, val_t nodeBefore);
-	val_t(ANN::*dN_dn_fp)(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
-	val_t dn_db_f(const Vector_t& n, size_t node);
-	val_t dn_dw_f(const Vector_t& n, size_t node, val_t nodeBefore);
-	val_t dN_dn_f(const Vector_t& n, size_t nextLayerNode, val_t weightBetween);
-
-
 };

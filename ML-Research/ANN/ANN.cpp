@@ -8,14 +8,8 @@ ANN::ANN(DataReader& dr) :
 	_curLayer(0), /* TODO: will getting rid of this hurt anyone? */
 	_layers(_layerSizes.size()),
 	_weights(_layerSizes.size() - 1),
-	_biases(_layerSizes.size() - 1),
-	activationFunc(&sigmoid),
-	dn_db_fp(&ANN::noFunc_dn_db),
-	dn_dw_fp(&ANN::noFunc_dn_dw),
-	dN_dn_fp(&ANN::noFunc_dN_dn)
+	_biases(_layerSizes.size() - 1)
 {
-	/* TODO: relocate temporary asserts */
-	
 	/* TODO: make an initWeights function */
 	for (int layer = 0; layer < _layers.size()-1; layer++) {
 		_layers[layer] = Vector_t::Zero(_layerSizes[layer]);
@@ -23,6 +17,25 @@ ANN::ANN(DataReader& dr) :
 		_biases[layer] = 0;
 	}
 	_layers[_layers.size()-1] = Vector_t::Zero(_layerSizes[_layers.size()-1]);
+	_dr.testAssertions(*this);
+}
+
+ANN::ANN(DataReader& dr, Params& params) :
+	_dr(dr),
+	_layerSizes({ dr.dataSize(), dr.labelSize() }),
+	_curLayer(0), /* TODO: will getting rid of this hurt anyone? */
+	_layers(_layerSizes.size()),
+	_weights(_layerSizes.size() - 1),
+	_biases(_layerSizes.size() - 1),
+	_params(params)
+{
+	/* TODO: make an initWeights function */
+	for (int layer = 0; layer < _layers.size() - 1; layer++) {
+		_layers[layer] = Vector_t::Zero(_layerSizes[layer]);
+		_weights[layer] = Matrix_t::Zero(_layerSizes[layer + 1], _layerSizes[layer]);
+		_biases[layer] = 0;
+	}
+	_layers[_layers.size() - 1] = Vector_t::Zero(_layerSizes[_layers.size() - 1]);
 	_dr.testAssertions(*this);
 }
 
@@ -41,7 +54,7 @@ void ANN::setInput(const Vector_t& input) {
 
 void ANN::processLayer(size_t layer) {
 	//scale(_layers[layer]);
-	_layers[layer + 1] = activationFunc(prepLayerAfter(layer)); /* TODO: normalize... but where? */
+	_layers[layer + 1] = _params.activationFunc(prepLayerAfter(layer)); /* TODO: normalize... but where? */
 	//scale(_layers[layer + 1]);
 }
 
