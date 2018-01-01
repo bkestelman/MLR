@@ -6,6 +6,8 @@
 #include "Data\LogicalAND\LogicalAND.h"
 #include "Data\MNISTReader\MNISTReader.h"
 #include "MLMath.h"
+#include "ANNLog.h"
+#include "ANNParams.h"
 
 class ANN {
 public:
@@ -14,27 +16,23 @@ public:
 	using val_t = double;
 	using data_t = int; /* Move to DataReader or use <> (TODO: what is this?) */
 
-	struct Params { /* Set ANN parameters. Leave default when uncertain */
-		val_t _stepFactor{ 1 };
+	ANNParams _params;
 
-		/* Activation Function and Derivatives */
-		Vector_t(*activationFunc)(const Vector_t&) { &MLMath::sigmoid };
-		val_t(*dn_db)(const Vector_t&, size_t) { &MLMath::noFunc_dn_db };
-		val_t(*dn_dw)(const Vector_t& n, size_t node, val_t nodeBefore) { &MLMath::noFunc_dn_dw };
-		val_t(*dN_dn)(const Vector_t& n, size_t nextLayerNode, val_t weightBetween) { &MLMath::noFunc_dN_dn };
-	};
-	Params _params;
+	ANNLog _log;
 
 	explicit ANN(const std::vector<size_t>& layerSizes);
 	explicit ANN(DataReader& dr); /* ANN based off DataReader with no hidden layers */
-	explicit ANN(DataReader& dr, Params& params);	
+	explicit ANN(DataReader& dr, ANNParams& params);	
 
 	Vector_t& train();
-	Vector_t& processInput();
+	void test();
 	Vector_t& const inputs();
 	Vector_t& const label();
-	void readNext();
+	void readNext(); /* read next data and label from DataReader */
 	void insertLayer(size_t size);
+
+	void log(std::string file);
+	int correct();
 
 	/* ANN Operator Overloads */
 	friend std::ostream& operator<<(std::ostream& os, const ANN& ann);
@@ -44,16 +42,19 @@ public:
 
 private:
 	DataReader& _dr;
-	Vector_t _input;
-	Vector_t _label;
-	//bool _simultaneousChanges{ true };
+	Vector_t _input; /* set by readNext() */
+	Vector_t _label; /* set by readNext() */
 	const std::vector<size_t> _layerSizes;
 	std::vector<Vector_t> _layers;
-	int _curLayer;
+	int _curLayer; /* TODO: delete */
 	std::vector<Matrix_t> _weights;
 	std::vector<val_t> _biases; 
+	int _correct;
+	int _tests;
+	int _trains;
 
 	void setInput(const Vector_t& input);
+	Vector_t& processInput();
 	void processLayer(size_t layer);
 
 	/* ANN Train */

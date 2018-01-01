@@ -1,6 +1,8 @@
 #include "ANN.h"
 
 ANN::Vector_t& ANN::train() {
+	_trains++;
+	readNext();
 	scale(_input);
 	backprop(processInput(), _label);
 	return _layers[outputLayer()];

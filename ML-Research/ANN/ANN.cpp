@@ -1,6 +1,8 @@
 #include "ANN.h"
+#include "ANNLog.h"
 #include<math.h>
 #include "Data\LogicalAND\LogicalAND.h"
+#include "VectorCalculations.h"
 
 ANN::ANN(DataReader& dr) :
 	_dr(dr),
@@ -8,7 +10,8 @@ ANN::ANN(DataReader& dr) :
 	_curLayer(0), /* TODO: will getting rid of this hurt anyone? */
 	_layers(_layerSizes.size()),
 	_weights(_layerSizes.size() - 1),
-	_biases(_layerSizes.size() - 1)
+	_biases(_layerSizes.size() - 1),
+	_log(_params)
 {
 	/* TODO: make an initWeights function */
 	for (int layer = 0; layer < _layers.size()-1; layer++) {
@@ -20,14 +23,15 @@ ANN::ANN(DataReader& dr) :
 	_dr.testAssertions(*this);
 }
 
-ANN::ANN(DataReader& dr, Params& params) :
+ANN::ANN(DataReader& dr, ANNParams& params) :
 	_dr(dr),
 	_layerSizes({ dr.dataSize(), dr.labelSize() }),
 	_curLayer(0), /* TODO: will getting rid of this hurt anyone? */
 	_layers(_layerSizes.size()),
 	_weights(_layerSizes.size() - 1),
 	_biases(_layerSizes.size() - 1),
-	_params(params)
+	_params(params),
+	_log(params)
 {
 	/* TODO: make an initWeights function */
 	for (int layer = 0; layer < _layers.size() - 1; layer++) {
@@ -37,6 +41,17 @@ ANN::ANN(DataReader& dr, Params& params) :
 	}
 	_layers[_layers.size() - 1] = Vector_t::Zero(_layerSizes[_layers.size() - 1]);
 	_dr.testAssertions(*this);
+}
+
+void ANN::test() {
+	_tests++;
+	readNext();
+	int labelIndex = maxIndex(_label);
+	Eigen::VectorXd output = processInput();
+	int outputIndex = maxIndex(output);
+	if (labelIndex == outputIndex) _correct++;
+	std::cout << "Label: " << _label << "\n";
+	std::cout << "Output: " << outputIndex << "\n" << output << std::endl;
 }
 
 ANN::Vector_t& ANN::processInput() {
@@ -83,4 +98,12 @@ void ANN::insertLayer(size_t size) {
 		assert(_weights[i].rows() == _layers[i+1].size());
 	}
 	//assert(false);
+}
+
+void ANN::log(std::string file) {
+	_log.log(file, _correct, _tests, _trains);
+}
+
+int ANN::correct() {
+	return _correct;
 }
