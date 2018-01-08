@@ -15,8 +15,14 @@ size_t ANN::nodeLayerBefore(size_t weightLayer) {
 ANN::val_t ANN::weight(size_t weightLayer, size_t nodeBefore, size_t nodeAfter) {
 	return _weights[weightLayer](nodeAfter, nodeBefore);
 }
-size_t ANN::weightLayerAfter(size_t nodeLayer) {
+ANN::val_t& ANN::weightDelta(size_t weightLayer, size_t nodeBefore, size_t nodeAfter) {
+	return _weightsDeltas[weightLayer](nodeAfter, nodeBefore);
+}
+size_t ANN::weightLayerAfter(size_t nodeLayer) const {
 	return nodeLayer;
+}
+size_t ANN::weightLayerBefore(size_t nodeLayer) {
+	return nodeLayer-1;
 }
 std::size_t ANN::lastWeightLayer() {
 	return _weights.size() - 1;

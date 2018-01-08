@@ -10,5 +10,8 @@ public:
 	virtual Vector_t readLabel() = 0;
 	virtual const size_t dataSize() = 0;
 	virtual const size_t labelSize() = 0;
-	virtual const void testAssertions(const ANN&) = 0;
+	//virtual const void testAssertions(const ANN&) = 0;
+	//virtual friend std::ostream& operator<<(std::ostream&, DataReader&) = 0;
+	virtual bool test(Vector_t) = 0;
+	virtual std::string log() = 0;
 };

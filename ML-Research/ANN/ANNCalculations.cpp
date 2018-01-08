@@ -3,9 +3,9 @@
 
 /* Calculate without processing (without changing values in the ANN) */
 
-/* Preps the next layer with weighted average plus bias calculation (no activation function) */
-ANN::Vector_t ANN::prepLayerAfter(size_t nodeLayer) {
-	return _weights[nodeLayer] * _layers[nodeLayer] + Vector_t::Constant(_layerSizes[nodeLayer + 1], _biases[nodeLayer]);
+ANN::Vector_t ANN::weightedSum(size_t nodeLayer) const { /* TODO: test performance change returning const Vector_t& */
+	assert(_layers[nodeLayer].size() == _weights[weightLayerAfter(nodeLayer)].cols());
+	return _weights[weightLayerAfter(nodeLayer)] * _layers[nodeLayer];
 }
 
 void ANN::scale(Vector_t& vec) {
@@ -23,19 +23,14 @@ void ANN::scale(Vector_t& vec) {
 }
 
 void ANN::normalize(Vector_t& vec) {
-	assert(false); 
 	assert(vec.size() > 0);
-	double range = 0;
-	double max = vec[0];
-	double min = vec[0];
+	double tot = 0;
 	for (auto i = 0; i < vec.size(); i++) {
-		if (vec[i] > max) max = vec[i];
-		else if (vec[i] < min) min = vec[i];
+		tot += vec[i];
 	}
-	if (max == min) return;
-	Vector_t normalizedVec(vec);
+	if (tot == 0) return;
 	for (auto i = 0; i < vec.size(); i++) {
-		vec[i] /= (max - min);
+		vec[i] /= tot;
 	}
 }
 
@@ -45,7 +40,29 @@ ANN::Vector_t ANN::output_dE_dn(const Vector_t& output, const Vector_t& label) {
 	for (auto node = 0; node < output.size(); node++) {
 		dE_dn[node] = output[node] - label[node]; /* technically should be * 2...
 													  Yes, it should be output - label,
-													  not label - output (calculate the derivative of a square difference function) */
+													  not label - output (calculate the derivative of a square difference function
+													  with respect to output) */
 	}
 	return dE_dn;
+}
+
+ANN::val_t ANN::error(const Vector_t& output, const Vector_t& label) {
+	val_t err = 0;
+	for (auto node = 0; node < output.size(); node++) {
+		val_t diff = output[node] - label[node]; 
+		err += diff * diff; 
+	}
+	return err;
+}
+
+ANN::val_t ANN::batchError() {
+	val_t err = 0;
+	for (int i = 0; i < _params._batchSize; i++) {
+		Vector_t output = processInput(i);
+		Vector_t diff = output - _labelBatch[i];
+		for (auto node = 0; node < output.size(); node++) {		
+			err += abs(diff[node]);// *diff[node];
+		}
+	}
+	return err;
 }

@@ -1,75 +1,49 @@
 #include "ANN.h"
-#include "ANNLog.h"
 #include<math.h>
-#include "Data\LogicalAND\LogicalAND.h"
 #include "VectorCalculations.h"
-
-ANN::ANN(DataReader& dr) :
-	_dr(dr),
-	_layerSizes({dr.dataSize(), dr.labelSize()}),
-	_curLayer(0), /* TODO: will getting rid of this hurt anyone? */
-	_layers(_layerSizes.size()),
-	_weights(_layerSizes.size() - 1),
-	_biases(_layerSizes.size() - 1),
-	_log(_params)
-{
-	/* TODO: make an initWeights function */
-	for (int layer = 0; layer < _layers.size()-1; layer++) {
-		_layers[layer] = Vector_t::Zero(_layerSizes[layer]);
-		_weights[layer] = Matrix_t::Zero(_layerSizes[layer + 1], _layerSizes[layer]);
-		_biases[layer] = 0;
-	}
-	_layers[_layers.size()-1] = Vector_t::Zero(_layerSizes[_layers.size()-1]);
-	_dr.testAssertions(*this);
-}
 
 ANN::ANN(DataReader& dr, ANNParams& params) :
 	_dr(dr),
-	_layerSizes({ dr.dataSize(), dr.labelSize() }),
-	_curLayer(0), /* TODO: will getting rid of this hurt anyone? */
-	_layers(_layerSizes.size()),
-	_weights(_layerSizes.size() - 1),
-	_biases(_layerSizes.size() - 1),
+	_layers(),
+	_weights(),
 	_params(params),
-	_log(params)
+	_layerSizes(_params._layerSizes),
+	_log(_params)
 {
-	/* TODO: make an initWeights function */
-	for (int layer = 0; layer < _layers.size() - 1; layer++) {
-		_layers[layer] = Vector_t::Zero(_layerSizes[layer]);
-		_weights[layer] = Matrix_t::Zero(_layerSizes[layer + 1], _layerSizes[layer]);
-		_biases[layer] = 0;
+	for (int layer = 0; layer < _layerSizes.size(); layer++) {
+		setupLayer(layer);
 	}
-	_layers[_layers.size() - 1] = Vector_t::Zero(_layerSizes[_layers.size() - 1]);
-	_dr.testAssertions(*this);
+//	_dr.testAssertions(*this);
+	_input = _layers[0];
+
+	_inputBatch = std::vector<Vector_t>(_params._batchSize);
+	_labelBatch = std::vector<Vector_t>(_params._batchSize);
 }
 
-void ANN::test() {
+ANN::Vector_t& ANN::test() {
 	_tests++;
 	readNext();
-	int labelIndex = maxIndex(_label);
-	Eigen::VectorXd output = processInput();
-	int outputIndex = maxIndex(output);
-	if (labelIndex == outputIndex) _correct++;
-	std::cout << "Label: " << _label << "\n";
-	std::cout << "Output: " << outputIndex << "\n" << output << std::endl;
+	Eigen::VectorXd output = processInput(0);
+	if (_dr.test(output)) _correct++;
+	_trainLog << "Input:\n" << _input << "\nLabel: " << _label << " Output: " << output << "\n";
+	return _layers[outputLayer()];
 }
 
-ANN::Vector_t& ANN::processInput() {
-	//scale(_input);
-	setInput(_input);
-	for (size_t layer = 0; layer < _layerSizes.size() - 1; layer++) {
+ANN::Vector_t ANN::processInput(int input) {
+	setInput(_inputBatch[input]);
+	for (size_t layer = 0; layer < _layers.size() - 1; layer++) {
 		processLayer(layer);
 	}
-	return _layers[_layerSizes.size()-1];
+	return _layers[outputLayer()].head(_layers[outputLayer()].size() - 1); /* don't return bias node */
 }
 
 void ANN::setInput(const Vector_t& input) {
-	_layers[0] = input;
+	_layers[0].head(_layers[0].size()-1) = input; /* TODO: make function for setting layer, without touching bias node */
 }
 
-void ANN::processLayer(size_t layer) {
+void ANN::processLayer(size_t layer) { /* aka feedforward */
 	//scale(_layers[layer]);
-	_layers[layer + 1] = _params.activationFunc(prepLayerAfter(layer)); /* TODO: normalize... but where? */
+	_layers[layer + 1].head(_layers[layer + 1].size() - 1) = _params.activationFunc(weightedSum(layer)); /* process next layer (but not its bias node) */
 	//scale(_layers[layer + 1]);
 }
 
@@ -83,25 +57,62 @@ ANN::Vector_t& ANN::label() {
 
 void ANN::readNext() {
 	_input = _dr.readData();
+	_inputBatch[0] = _input;
+	//normalize(_input);
 	_label = _dr.readLabel();
 }
-
-void ANN::insertLayer(size_t size) {
-	_layers.insert(_layers.begin() + 1, Vector_t::Zero(size));
-	_weights.insert(_weights.begin() + 1, Matrix_t::Zero(_layers[1].size(), _layers[0].size()));
-	_weights[1] = Matrix_t::Zero(_layers[2].size(), _layers[1].size());
-	_biases.insert(_biases.begin() + 1, 0);
-	assert(_weights.size() == 2);
-	assert(_layers.size() == 3);
-	for (auto i = 0; i < _weights.size(); i++) {
-		assert(_weights[i].cols() == _layers[i].size());
-		assert(_weights[i].rows() == _layers[i+1].size());
+void ANN::readBatch() {
+	for (int i = 0; i < _params._batchSize; i++) {
+		readNext();
+		//normalize(_input);
+		_inputBatch[i] = _input;
+		_labelBatch[i] = _label;
 	}
-	//assert(false);
 }
 
+void ANN::insertLayer(size_t layer, size_t size) {
+	assert(layer <= _layers.size());
+	_layerSizes.insert(_layerSizes.begin() + layer, size);
+	setupLayer(layer);
+}
+void ANN::setupLayer(size_t layer) {
+	_layers.insert(_layers.begin() + layer, Vector_t::Constant(_layerSizes[layer] + 1, -1)); /* extra bias node fixed -1 (arbitrary) */
+	//assert(_layers[0].size() == 3);
+	if (_layers.size() == 1) return; // if inserted layer is only layer, no weights to init
+	if (layer != 0) { // if not first layer, init weights before layer
+		insertWeightsBefore(layer);
+	}
+	if (layer != _layers.size() - 1) {
+		setWeightsAfter(layer);
+	}
+	for (auto weightLayer = 0; weightLayer < _weights.size(); weightLayer++) {
+		assert(_weights[weightLayer].cols() == _weightsDeltas[weightLayer].cols());
+		assert(_weights[weightLayer].rows() == _weightsDeltas[weightLayer].rows());
+		assert(_weights[weightLayer].cols() == _layers[nodeLayerBefore(weightLayer)].size());
+		assert(_weights[weightLayer].rows() == _layers[nodeLayerAfter(weightLayer)].size() - 1); /* one less row (no weights to next layer bias node) */
+	}
+	for (auto nodeLayer = 0; nodeLayer < _layers.size() - 1; nodeLayer++) {
+		assert(_layers[nodeLayer].size() == _weights[weightLayerAfter(nodeLayer)].cols());
+		assert(_layers[nodeLayer].size() == 1 + _layerSizes[nodeLayer]);
+	}
+}
+void ANN::insertWeightsBefore(size_t layer) { /* also inserts bias */
+	assert(layer != 0);
+	_weights.insert(_weights.begin() + weightLayerBefore(layer), 
+		_params._initMatrix(_layers[layer].size() - 1, _layers[layer - 1].size())); /* one less row (no weights to next layer bias node) */
+	_weightsDeltas.insert(_weightsDeltas.begin() + weightLayerBefore(layer), 
+		Matrix_t::Zero(_layers[layer].size() - 1, _layers[layer - 1].size()));
+}
+void ANN::setWeightsAfter(size_t layer) { /* also inserts bias */
+	assert(layer != _layers.size() - 1);
+	_weights[layer] = _params._initMatrix(_layers[layer + 1].size() - 1, _layers[layer].size()); /* one less row (no weights to next layer bias node) */
+	_weightsDeltas[layer] = Matrix_t::Zero(_layers[layer + 1].size() - 1, _layers[layer].size());
+}
+
+
 void ANN::log(std::string file) {
-	_log.log(file, _correct, _tests, _trains);
+	_log.extraLog(_dr.log());
+	_log.log(file, _correct, _tests, _trains); /* TODO: use results struct */
 }
 
 int ANN::correct() {

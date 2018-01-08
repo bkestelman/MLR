@@ -6,18 +6,18 @@ std::ostream& operator<<(std::ostream& os, const std::vector<ANN::Matrix_t> matr
 	}
 	return os;
 }
-std::ostream& operator<<(std::ostream& os, const std::vector<ANN::val_t> biases) {
+std::ostream& operator<<(std::ostream& os, const std::vector<ANN::Vector_t> biases) {
 	for (auto& bias : biases) {
-		os << bias << ", ";
+		os << bias << "\n\n";
 	}
 	os << std::endl;
 	return os;
 }
-std::ostream& operator<<(std::ostream& os, const ANN& ann) {
+std::ostream& operator<<(std::ostream& os, const ANN& ann) { /* TODO: */
 	os << "ANN\n---\n";
 	os << "Weights\n";
 	os << ann._weights;
-	os << "Biases\n";
-	os << ann._biases;
+	os << "Layers\n";
+	os << ann._layers;
 	return os;
 }
