@@ -226,6 +226,7 @@ bool MNISTReader::test(DataReader::Vector_t output) {
 	int labelIndex = maxIndex(_label); /* TODO: fix maxIndex namespace (it's in VectorCalculations.h) */
 	int outputIndex = maxIndex(output);
 	if (labelIndex == outputIndex) return true;
+	else return false;
 }
 
 std::string MNISTReader::log() { /* TODO: use operator<< */

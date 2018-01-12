@@ -1,4 +1,4 @@
 #pragma once
-#include<Eigen\Dense>
+#include<Eigen/Dense>
 
 int maxIndex(Eigen::VectorXd vec);

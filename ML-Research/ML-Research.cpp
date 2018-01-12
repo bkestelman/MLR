@@ -4,10 +4,10 @@
 // #include "stdafx.h"
 #include<iostream>
 #include<vector>
-#include "ANN\ANN.h"
-#include "Data\MNISTReader\MNISTReader.h"
-#include "Data\LogicalFunctions\LogicalAND.h"
-#include "Data\LogicalFunctions\LogicalXOR.h"
+#include "ANN/ANN.h"
+#include "Data/MNISTReader/MNISTReader.h"
+#include "Data/LogicalFunctions/LogicalAND.h"
+#include "Data/LogicalFunctions/LogicalXOR.h"
 #include "MLMath.h"
 
 /* TODO: 
@@ -25,7 +25,7 @@ int main()
 {
 	std::cout << "Hello World" << std::endl;
 	//std::ofstream os{ "out.log" };
-	MNISTReader& mr = MNISTReader();
+	MNISTReader mr = MNISTReader();
 	mr._dataStep = 2; 
 	mr._scaleDown = 255;
 	DataReader& dr = mr;

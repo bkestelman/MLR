@@ -1,10 +1,10 @@
 #pragma once
-#include "Data\DataReader.h"
+#include "Data/DataReader.h"
 
 class ANN;
 class LogicalXOR : public DataReader { /* TODO: maybe extend LogicalFunction */
 public:
-	LogicalXOR::LogicalXOR();
+	LogicalXOR();
 	DataReader::Vector_t readData() override;
 	DataReader::Vector_t readLabel() override;
 	const size_t dataSize() override;

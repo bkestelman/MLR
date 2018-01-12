@@ -47,8 +47,9 @@ void ANNLog::log(std::string file, int correct, int tests, int trains) { /* TODO
 	/* TODO: clean up clock stuff */
 	auto now = std::chrono::system_clock::now();
 	std::time_t time = std::chrono::system_clock::to_time_t(now);
-	char date[40]; /* TODO: is this a good value? */ 
-	ctime_s(date, 40, &time);
+	time_t date[40]; /* TODO: is this a good value? */ 
+	//ctime_s(date, 40, &time);
+	ctime(date);
 	out << date << "\n";
 	out << "Layer sizes: { ";
 	for (size_t l = 0; l < _params._layerSizes.size(); l++) {

@@ -1,5 +1,5 @@
 #pragma once
-#include "Data\DataReader.h"
+#include "Data/DataReader.h"
 #include<string>
 #include<fstream>
 #include<vector>

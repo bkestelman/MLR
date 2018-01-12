@@ -1,10 +1,10 @@
 #pragma once
-#include "Data\DataReader.h"
+#include "Data/DataReader.h"
 
 class ANN;
 class LogicalAND : public DataReader {
 public:
-	LogicalAND::LogicalAND();
+	LogicalAND();
 	DataReader::Vector_t readData() override;
 	DataReader::Vector_t readLabel() override;
 	const size_t dataSize() override;

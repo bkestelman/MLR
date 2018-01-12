@@ -1,10 +1,10 @@
 #pragma once
 #include<vector>
 #include<iostream>
-#include<Eigen\Dense>
-#include "Data\DataReader.h"
-#include "Data\LogicalFunctions\LogicalAND.h"
-#include "Data\MNISTReader\MNISTReader.h"
+#include<Eigen/Dense>
+#include "Data/DataReader.h"
+#include "Data/LogicalFunctions/LogicalAND.h"
+#include "Data/MNISTReader/MNISTReader.h"
 #include "MLMath.h"
 #include "ANNLog.h"
 #include "ANNParams.h"
@@ -25,8 +25,8 @@ public:
 
 	void train();
 	Vector_t& test();
-	Vector_t& const inputs();
-	Vector_t& const label();
+	Vector_t& inputs();
+	Vector_t& label();
 	Vector_t& output() { return _layers[_layers.size() - 1]; };
 	void readNext(); /* read next data and label from DataReader TODO: private */
 	void readBatch();
