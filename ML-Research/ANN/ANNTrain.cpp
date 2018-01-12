@@ -11,14 +11,15 @@ void ANN::train() {
 	//_trainLog << "output after train:\n" << processInput(0) << "\n";
 	//_trainLog << *this << "\n";
 	val_t errAfter = batchError();
-	//_trainLog << "err before: " << errBefore << "\nerr after: " << errAfter << "\n";
-	assert(errBefore > errAfter);
+	_trainLog << "err before: " << errBefore << "\nerr after: " << errAfter << "\n";
+	//assert(errBefore > errAfter);
 	//for (int i = 0; i < _layers.size()-1; i++) {
 	//	assert(_layers[i][_layers[i].size() - 1] = -1); /* check that biases are unchanged */
 	//}
 }
 
 void ANN::backprop() {
+	//_trainLog << *this << "\n";
 	for (int epoch = 0; epoch < _params._iterations; epoch++) { 
 		Vector_t bp_delta(_layerSizes[outputLayer()]);
 		Vector_t output_delta = Vector_t::Zero(_layerSizes[outputLayer()]);

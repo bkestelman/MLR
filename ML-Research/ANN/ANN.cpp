@@ -23,9 +23,13 @@ ANN::ANN(DataReader& dr, ANNParams& params) :
 ANN::Vector_t& ANN::test() {
 	_tests++;
 	readNext();
-	Eigen::VectorXd output = processInput(0);
-	if (_dr.test(output)) _correct++;
-	_trainLog << "Input:\n" << _input << "\nLabel: " << _label << " Output: " << output << "\n";
+	Eigen::VectorXd output = processInput(0);	
+	_trainLog << "\nLabel:\n" << _label << "\nOutput:\n" << output << "\n";
+	if (_dr.test(output)) {
+		_correct++;
+		_trainLog << "Correct\n";
+		_trainLog << "count: " << _correct << "\n";
+	}
 	return _layers[outputLayer()];
 }
 
