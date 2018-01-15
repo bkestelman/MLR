@@ -1,7 +1,7 @@
 CXXFLAGS = -I eigen/ -I . -g -lpqxx -lpq
 OBJDIR = build
 DATA = Data
-ANN = ANN
+ANN = ann
 OBJ = $(addprefix $(OBJDIR)/, ML-Research.o MLMath.o VectorCalculations.o SystemInfo.o \
       $(DATA)/MNISTReader/MNISTReader.o \
       $(DATA)/LogicalFunctions/LogicalXOR.o \
@@ -15,7 +15,6 @@ $(OBJDIR)/%.o: %.cpp
 
 $(OBJ): | $(OBJDIR)
 $(OBJDIR):
-	mkdir $(OBJDIR)
 	mkdir $(OBJDIR)/$(DATA)
 	mkdir $(OBJDIR)/$(DATA)/MNISTReader
 	mkdir $(OBJDIR)/$(DATA)/LogicalFunctions
