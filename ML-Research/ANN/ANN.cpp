@@ -80,34 +80,6 @@ void ANN::insertLayer(size_t layer, size_t size) {
 	_layerSizes.insert(_layerSizes.begin() + layer, size);
 	//setupLayer(layer);
 }
-void ANN::setupLayer(size_t layer) { /* DEPRECATED */
-	assert(layer < _layerSizes.size());
-	if(layer < _layerSizes.size() - 1) 
-		_layers.insert(_layers.begin() + layer, Vector_t::Constant(_layerSizes[layer] + 1, -1)); /* extra bias node fixed -1 (arbitrary) */
-	else 
-		_layers.insert(_layers.begin() + layer, Vector_t::Constant(_layerSizes[layer], -1)); /* no extra bias node for output layer */
-	if (_layers.size() == 1) return; // if inserted layer is only layer, no weights to init
-	if (layer != 0) { // if not first layer, init weights before layer
-		insertWeightsBefore(layer);
-	}
-	if (layer != _layers.size() - 1) {
-		setWeightsAfter(layer);
-	}
-}
-void ANN::insertWeightsBefore(size_t layer) { /* also inserts bias */ /* DEPRECATED */
-	assert(layer != 0);
-	_weights.insert(_weights.begin() + weightLayerBefore(layer), 
-		_params._initMatrix(_layers[layer].size() - 1, _layers[layer - 1].size())); /* one less row (no weights to next layer bias node) */
-	_weightsDeltas.insert(_weightsDeltas.begin() + weightLayerBefore(layer), 
-		Matrix_t::Zero(_layers[layer].size() - 1, _layers[layer - 1].size()));
-}
-void ANN::setWeightsAfter(size_t layer) { /* also inserts bias */ /* DEPRECATED */
-	assert(layer != _layers.size() - 1);
-	bool weightsToOutput = (layer == outputLayer()-1);
-	_weights[layer] = _params._initMatrix(_layers[layer + 1].size() - !weightsToOutput, _layers[layer].size()); /* one less row (no weights to next layer bias node) */
-	_weightsDeltas[layer] = Matrix_t::Zero(_layers[layer + 1].size() - !weightsToOutput, _layers[layer].size());
-}
-
 
 void ANN::log(std::string file) {
 	_log.extraLog(_dr.log());

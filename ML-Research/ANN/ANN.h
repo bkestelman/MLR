@@ -86,9 +86,6 @@ private:
 	size_t weightLayerBefore(size_t nodeLayer);
 	size_t lastWeightLayer();
 	size_t outputLayer();
-	void insertWeightsBefore(size_t layer);
-	void setWeightsAfter(size_t layer);
-	void setupLayer(size_t layer); /* Insert layer using value in _layerSizes for size (private, used by constructor) */
 	size_t sizeWithBias(size_t nodeLayer);
 	size_t sizeNoBias(size_t nodeLayer);
 
