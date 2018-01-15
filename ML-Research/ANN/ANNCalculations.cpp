@@ -4,7 +4,6 @@
 /* Calculate without processing (without changing values in the ANN) */
 
 ANN::Vector_t ANN::weightedSum(size_t nodeLayer) const { /* TODO: test performance change returning const Vector_t& */
-	assert(_layers[nodeLayer].size() == _weights[weightLayerAfter(nodeLayer)].cols());
 	return _weights[weightLayerAfter(nodeLayer)] * _layers[nodeLayer];
 }
 
@@ -39,30 +38,19 @@ ANN::Vector_t ANN::output_dE_dn(const Vector_t& output, const Vector_t& label) {
 	Vector_t dE_dn{ output.size() };
 	for (auto node = 0; node < output.size(); node++) {
 		dE_dn[node] = output[node] - label[node]; /* technically should be * 2...
-													  Yes, it should be output - label,
-													  not label - output (calculate the derivative of a square difference function
-													  with respect to output) */
+							     Yes, it should be output - label,
+							     not label - output (calculate the derivative of a square difference function
+							     with respect to output) */
 	}
 	return dE_dn;
 }
 
-ANN::val_t ANN::error(const Vector_t& output, const Vector_t& label) {
+ANN::val_t ANN::error() {
 	val_t err = 0;
+	Vector_t output = _layers[outputLayer()];
 	for (auto node = 0; node < output.size(); node++) {
-		val_t diff = output[node] - label[node]; 
+		val_t diff = output[node] - _label[node]; 
 		err += diff * diff; 
-	}
-	return err;
-}
-
-ANN::val_t ANN::batchError() {
-	val_t err = 0;
-	for (int i = 0; i < _params._batchSize; i++) {
-		Vector_t output = processInput(i);
-		Vector_t diff = output - _labelBatch[i];
-		for (auto node = 0; node < output.size(); node++) {		
-			err += abs(diff[node]);// *diff[node];
-		}
 	}
 	return err;
 }

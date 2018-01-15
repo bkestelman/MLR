@@ -11,7 +11,7 @@ struct ANNParams { /* Set ANN parameters. Leave default when uncertain */
 
 	val_t _learningRate{ 1 };
 	std::vector<size_t>& _layerSizes;
-	int _batchSize{ 1 };
+	int _batchSize{ -1 };
 	int _iterations{ 1 };
 	val_t _beta{ 1 };
 

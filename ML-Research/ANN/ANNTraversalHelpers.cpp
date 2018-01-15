@@ -28,6 +28,11 @@ std::size_t ANN::lastWeightLayer() {
 	return _weights.size() - 1;
 }
 size_t ANN::outputLayer() {
-	return _layers.size() - 1;
+	return _layerSizes.size() - 1;
 }
-
+size_t ANN::sizeWithBias(size_t layer) {
+	return _layers[layer].size();
+}
+size_t ANN::sizeNoBias(size_t layer) {
+	return _layerSizes[layer];
+}

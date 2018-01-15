@@ -23,15 +23,14 @@ public:
 	//explicit ANN(DataReader& dr); /* ANN based off DataReader with no hidden layers */
 	explicit ANN(DataReader& dr, ANNParams& params);	
 
+	void init(); /* run necessary initialization that can't be done in constructor (ex: init weights, after layers inserted, after constructor) */
 	void train();
 	Vector_t& test();
 	Vector_t& inputs();
 	Vector_t& label();
 	Vector_t& output() { return _layers[_layers.size() - 1]; };
 	void readNext(); /* read next data and label from DataReader TODO: private */
-	void readBatch();
 	void insertLayer(size_t layer, size_t size);
-	Vector_t processInput(int input); /* processes specific input from batch */
 	Vector_t layer(size_t l) { return _layers[l]; };
 
 	void log(std::string file);
@@ -47,8 +46,6 @@ private:
 	DataReader& _dr;
 	Vector_t _input; /* set by readNext() */
 	Vector_t _label; /* set by readNext() */
-	std::vector<Vector_t> _inputBatch;
-	std::vector<Vector_t> _labelBatch;
 	std::vector<size_t>& _layerSizes;
 	std::vector<Vector_t> _layers;
 public:
@@ -62,8 +59,13 @@ private:
 	int _trains;
 	std::vector<val_t> errors;
 
-	void setInput(const Vector_t& input);
+	void setInput();
+	Vector_t& processInput();
 	void processLayer(size_t layer);
+
+	void initLayers();
+	void initWeights();
+	Matrix_t initWeightMatrix(size_t weightLayer);
 
 	/* ANN Train */
 	void backprop(); /* backprop batch */
@@ -87,12 +89,13 @@ private:
 	void insertWeightsBefore(size_t layer);
 	void setWeightsAfter(size_t layer);
 	void setupLayer(size_t layer); /* Insert layer using value in _layerSizes for size (private, used by constructor) */
+	size_t sizeWithBias(size_t nodeLayer);
+	size_t sizeNoBias(size_t nodeLayer);
 
 	/* ANN Calculations */
 	Vector_t weightedSum(size_t nodeLayer) const;
 	Vector_t output_dE_dn(const Vector_t& output, const Vector_t& label);
-	val_t error(const Vector_t& output, const Vector_t& label);
-	val_t batchError();
+	val_t error();
 	void normalize(Vector_t& vec); /* TODO: Move to MLMath, return Vector_t */
 	void scale(Vector_t& vec);
 

@@ -4,6 +4,7 @@
 #include<fstream>
 #include<chrono>
 #include<ctime>
+#include<time.h>
 
 ANNLog::ANNLog(ANNParams& params) :
 	_params(params),

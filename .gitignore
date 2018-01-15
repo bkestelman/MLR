@@ -260,3 +260,11 @@ paket-files/
 __pycache__/
 *.pyc
 /ML-Research/Eigen/Eigen
+
+# Linux
+/ML-Research/eigen
+/ML-Research/build
+/ML-Research/MLR
+*.bak
+/ML-Research/MLR
+/ML-Research/a.out
