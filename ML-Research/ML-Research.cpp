@@ -18,7 +18,6 @@
 - softmax activation function
 - cross entropy loss function (add loss function param)
 - move out of debug build?
-- test on linux
 - consolidate stuff in ANNCalculations, VectorCalculations, MLMath
 */
 
@@ -26,11 +25,9 @@ int main()
 {
 	std::cout << "Hello World" << std::endl;
 	//std::ofstream os{ "out.log" };
-	MNISTReader mr = MNISTReader();
-	mr._dataStep = 2; 
-	mr._scaleDown = 255;
-	LogicalXOR xr = LogicalXOR();
-	StockData S = StockData(2);
+	MNISTReader mr = MNISTReader(2);
+	//LogicalXOR xr = LogicalXOR();
+	//StockData S = StockData(2);
 	DataReader& dr = mr;
 	std::vector<size_t> layerSizes({ dr.dataSize(), dr.labelSize() }); /* TODO: shove DataReader info
 									   into params through constructor*/
@@ -39,35 +36,39 @@ int main()
 	params.activationFunc_d = MLMath::sigmoid_d;
 	params._learningRate = 1;
 	params._initMatrix = MLMath::randMatrix;
-	params._batchSize = 1;
+	params._batchSize = 10000;
 	params._iterations = 1;
 	ANN ann(dr, params);
 	ann.insertLayer(1, 15);
 	ann.init();
 	//ann.insertLayer(1, 4);
-	int train = 10000;
-	int test = 1000;
-	//for (int i = 0; i < test; i++) { // pre-train tests
-	//	ann.test(); /* TODO: return test output */
-	//}
-	for (int i = 0; i < train + test; i++) {
-		std::cout << "i: " << i << "\n";
-		//os << "i: " << i << "\n";
-		//output = ann.processInput();
-		if (i >= train) {
-			ann.test(); /* TODO: return test output */
-		}
-		else ann.train();
-		//os << "Label:\n" << ann.label() << "\n" << "End Label" << "\n";
-		//os << "Output before training:\n" << output << "\n" << "End output" << "\n";
-		//os << "layer 1:\n" << ann.layer(1) << "\n";
-		//output = ann.processInput();
-		//os << "Output after training:\n" << output << "\n" << "End output" << "\n";
-		//os << "layer 1:\n" << ann.layer(1) << "\n";
-		//os << "Biases: " << ann._biases[0] << "\n";// << ", " << ann._biases[1] << "\n";
-		//os << "Labelcount:\n" << mr._labelCounts << "\n";
-		//std::cout << ann << std::endl;
-	}
+	ann.trainBatch(1);
+	//ann.testOnBatch();
+	std::cout << "Testing\n";
+	ann.test(1000);
+//	int train = 1000;
+//	int test = 100;
+//	//for (int i = 0; i < test; i++) { // pre-train tests
+//	//	ann.test(); /* TODO: return test output */
+//	//}
+//	for (int i = 0; i < train + test; i++) {
+//		std::cout << "i: " << i << "\n";
+//		//os << "i: " << i << "\n";
+//		//output = ann.processInput();
+//		if (i >= train) {
+//			ann.test(); /* TODO: return test output */
+//		}
+//		else ann.train();
+//		//os << "Label:\n" << ann.label() << "\n" << "End Label" << "\n";
+//		//os << "Output before training:\n" << output << "\n" << "End output" << "\n";
+//		//os << "layer 1:\n" << ann.layer(1) << "\n";
+//		//output = ann.processInput();
+//		//os << "Output after training:\n" << output << "\n" << "End output" << "\n";
+//		//os << "layer 1:\n" << ann.layer(1) << "\n";
+//		//os << "Biases: " << ann._biases[0] << "\n";// << ", " << ann._biases[1] << "\n";
+//		//os << "Labelcount:\n" << mr._labelCounts << "\n";
+//		//std::cout << ann << std::endl;
+//	}
 	//std::cout << ann << std::endl;
 	ann.log("ann.log");
 	//os.close();

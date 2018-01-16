@@ -10,6 +10,24 @@ void ANN::train() {
 	val_t errAfter = error();
 	_trainLog << "err before: " << errBefore << "\nerr after: " << errAfter << "\n";
 }
+void ANN::train(int epochs) { /* DEPRECATED */
+	for(int i = 0; i < epochs; i++) {
+		std::cout << "i: " << i << "\n";
+		train();
+	}
+}
+void ANN::trainBatch() {
+	_dr.seek(0);
+	for(int i = 0; i < _params._batchSize; i++) {
+		std::cout << "i: " << i << "\n";
+		train();
+	}
+}
+void ANN::trainBatch(int epochs) {
+	for(int i = 0; i < epochs; i++) {
+		trainBatch();
+	}
+}
 
 void ANN::backprop() {
 	Vector_t bp_delta(_layerSizes[outputLayer()]);

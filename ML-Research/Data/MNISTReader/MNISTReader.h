@@ -7,11 +7,13 @@
 class ANN;
 class MNISTReader : public DataReader {
 public:
-	MNISTReader();
+	MNISTReader(int dataSize);
 	DataReader::Vector_t readData() override;
 	DataReader::Vector_t readLabel() override;
 	const size_t dataSize() override;
 	const size_t labelSize() override;
+	void prepareBuffer() override;
+	void seek(int) override;
 	bool test(DataReader::Vector_t) override;
 	std::string log() override;
 	//const void testAssertions(const ANN&) override;
@@ -27,10 +29,16 @@ private:
 		std::string filename;
 		std::ifstream fstream;
 		int headers, magicNumber, items, imageWidth, imageHeight;
+		int dataPos; 
 	};
+	int itemsRead;
+	int _bufferSize;
+	int _next;
+
 	static const int MNISTFileCount = 4;
 	MNISTFile MNISTFiles[MNISTFileCount];
-	std::vector<int> _dataBuffer;
+	std::vector<Vector_t> _dataBuffer;
+	std::vector<Vector_t> _labelBuffer;
 	int _curItem;
 	Vector_t _label;
 
@@ -39,12 +47,11 @@ private:
 	void openStreams();
 	void readHeaders();
 	void readHeaders(MNISTFile& file);	
-	//void readDataToBuffer();
+	Vector_t readDataFromSource(); /* called by prepareBuffer() */
+	Vector_t readLabelFromSource();
 
 	int imageFileToRead();
 	int labelFileToRead();
-
-	int itemsRead;
 
 	std::ofstream _debug_log; 
 };

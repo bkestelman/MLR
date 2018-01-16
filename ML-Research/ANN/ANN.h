@@ -25,7 +25,12 @@ public:
 
 	void init(); /* run necessary initialization that can't be done in constructor (ex: init weights, after layers inserted, after constructor) */
 	void train();
+	void train(int); /* DEPRECATED */
+	void trainBatch();
+	void trainBatch(int);
 	Vector_t& test();
+	void test(int);
+	void testOnBatch();
 	Vector_t& inputs();
 	Vector_t& label();
 	Vector_t& output() { return _layers[_layers.size() - 1]; };

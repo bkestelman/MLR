@@ -53,6 +53,20 @@ ANN::Vector_t& ANN::test() {
 	}
 	return _layers[outputLayer()];
 }
+void ANN::test(int tests) {
+	_dr.seek(_params._batchSize);
+	for(int i = 0; i < tests; i++) {
+		std::cout << "i: " << i << "\n";
+		test();
+	}
+}
+void ANN::testOnBatch() {
+	_dr.seek(0);
+	for(int i = 0; i < _params._batchSize; i++) {
+		std::cout << "i: " << i << "\n";
+		test();
+	}
+}
 
 void ANN::setInput() {
 	_layers[0].head(sizeNoBias(0)) = _input; /* TODO: make function for setting layer, without touching bias node */
