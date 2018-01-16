@@ -43,9 +43,9 @@ int main()
 	ann.init();
 	//ann.insertLayer(1, 4);
 	ann.trainBatch(1);
-	//ann.testOnBatch();
 	std::cout << "Testing\n";
-	ann.test(1000);
+	//ann.testOnBatch();
+	ann.test(100);
 //	int train = 1000;
 //	int test = 100;
 //	//for (int i = 0; i < test; i++) { // pre-train tests

@@ -25,3 +25,4 @@ DataReader::Vector_t BufferedDataReader::readLabel() { /* TODO: read data and la
 	_label = _labelBuffer[_next++ % _bufferSize];
 	return _label;
 }
+

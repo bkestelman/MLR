@@ -6,6 +6,7 @@ OBJ = $(addprefix $(OBJDIR)/, ML-Research.o MLMath.o VectorCalculations.o System
       $(DATA)/BufferedDataReader.o \
       $(DATA)/MNISTReader/MNISTReader.o \
       $(DATA)/LogicalFunctions/LogicalXOR.o \
+      $(DATA)/StockData/StockData.o \
       $(ANN)/ANN.o $(ANN)/ANNTrain.o $(ANN)/ANNLog.o $(ANN)/ANNCalculations.o $(ANN)/ANNTraversalHelpers.o)
 
 MLR: $(OBJ) 

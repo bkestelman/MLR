@@ -3,24 +3,24 @@
 #include <pqxx/pqxx>
 
 StockData::StockData(size_t dataSize) :
+	BufferedDataReader(1),
 	_dataSize(dataSize),
 	_dataOffset(0),
-	_label(1),
-	_bufferSize(1),
-	_dataBuffer(_bufferSize),
-	_labelBuffer(_bufferSize)
+	_label(1)
 {
+	prepareBuffer(); /* TODO: should be in BufferedDataReader? */
 }
 
-StockData::Vector_t StockData::readData() {
+StockData::Vector_t StockData::readDataFromSource() {
 	Vector_t deltas = Vector_t::Zero(_dataSize);
 	Vector_t opens = Vector_t::Zero(_dataSize+2); // one extra open to get change, another extra to get label change
+	int month = 30; /* predict distance TODO: put somewhere */
 
 	pqxx::connection C;
 	//std::cout << "Connected to " << C.dbname() << "\n";
 	pqxx::work W(C);
 
-	pqxx::result R = W.exec("SELECT date, open FROM stockdaily WHERE stock_id=2401 ORDER BY date"); /* TODO: choose stock_id or symbol */
+	pqxx::result R = W.exec("SELECT open FROM stockdaily WHERE stock_id=2401 ORDER BY date"); /* TODO: choose stock_id or symbol */
 
 	//std::cout << "Found " << R.size() << " stocks:\n";
 	R[_dataOffset]["open"].to(opens[0]); /* TODO: readResult() function */
@@ -29,7 +29,7 @@ StockData::Vector_t StockData::readData() {
 		//deltas[i] = opens[i+1] - opens[i];
 		deltas[i] = opens[i+1] > opens[i] ? 1 : 0;
 	}
-	R[_dataOffset+_dataSize+1]["open"].to(opens[_dataSize+1]);
+	R[month+_dataOffset+_dataSize+1]["open"].to(opens[_dataSize+1]);
 	_label[0] = opens[_dataSize+1] > opens[_dataSize] ? 1 : 0;
 
 	//std::cout << opens << "\n";
@@ -40,7 +40,7 @@ StockData::Vector_t StockData::readData() {
 	return deltas;
 }
 
-StockData::Vector_t StockData::readLabel() {
+StockData::Vector_t StockData::readLabelFromSource() {
 	return _label;
 }
 
@@ -59,4 +59,8 @@ const size_t StockData::labelSize() {
 
 std::string StockData::log() {
 	return "StockData";
+}
+
+void StockData::seek(int pos) {
+	_dataOffset = pos;
 }
