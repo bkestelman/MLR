@@ -5,7 +5,10 @@
 StockData::StockData(size_t dataSize) :
 	_dataSize(dataSize),
 	_dataOffset(0),
-	_label(1)
+	_label(1),
+	_bufferSize(1),
+	_dataBuffer(_bufferSize),
+	_labelBuffer(_bufferSize)
 {
 }
 

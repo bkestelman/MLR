@@ -32,53 +32,34 @@ static const int TRAIN_LABELS_FILE = 2;
 static const int TEST_LABELS_FILE = 3;
 
 MNISTReader::MNISTReader(int dataStep) : /* TODO: params struct */
+	BufferedDataReader(100), /* TODO: let user choose bufferSize */
 	itemsRead(0),
 	_debug_log("mnist.log"),
 	_dataStep(dataStep),
 	_scaleDown(255),
-	_labelCounts(DataReader::Vector_t::Zero(10)), /* TODO: what is this */
-	_bufferSize(100), /* TODO: set by user */
-	_dataBuffer(_bufferSize),
-	_labelBuffer(_bufferSize)
+	_labelCounts(DataReader::Vector_t::Zero(10)) /* TODO: what is this */
 {
 	setupFilenames();
 	setupHeaderCounts();
 	openStreams();
 	readHeaders();
-	prepareBuffer();
+	BufferedDataReader::prepareBuffer();
 }
 
-void MNISTReader::prepareBuffer() {
-	for(int i = 0; i < _bufferSize; i++) {
-		_dataBuffer[i] = readDataFromSource();
-		_labelBuffer[i] = readLabelFromSource();
-	}
-	_next = 0;
-}
 void MNISTReader::seek(int pos) {
 	//int f = imageFileToRead();
 	int f = TRAIN_IMAGES_FILE;
 	MNISTFile& imageFile = MNISTFiles[f];
 	std::cout << "seeking to " << imageFile.dataPos << " + " << pos*dataSize() << " * " << _dataStep << "\n";
-	imageFile.fstream.seekg(imageFile.dataPos + pos*dataSize()*_dataStep); // TODO: HIGH: why do i need * sizeof(int) ?????????????
+	imageFile.fstream.seekg(imageFile.dataPos + pos*dataSize()*_dataStep); 
 	std::cout << "tellg " << imageFile.fstream.tellg() << "\n";
 	//f = labelFileToRead();
 	f = TRAIN_LABELS_FILE;
 	MNISTFile& labelFile = MNISTFiles[f];
 	labelFile.fstream.seekg(labelFile.dataPos + pos);
-	prepareBuffer();
+	BufferedDataReader::prepareBuffer();
 }
 	
-DataReader::Vector_t MNISTReader::readData() { /* TODO: read data and label simultaneously, into struct */
-	if(_next > _bufferSize) prepareBuffer();
-	return _dataBuffer[_next % _bufferSize];
-}
-DataReader::Vector_t MNISTReader::readLabel() { /* TODO: read data and label simultaneously, into struct */
-	if(_next > _bufferSize) prepareBuffer();
-	_label = _labelBuffer[_next++ % _bufferSize];
-	return _label;
-}
-
 DataReader::Vector_t MNISTReader::readDataFromSource() {
 	int f = imageFileToRead();
 	MNISTFile& file = MNISTFiles[f];
