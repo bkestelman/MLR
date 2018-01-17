@@ -1,26 +1,22 @@
 #include "StockData.h"
 #include <iostream>
-#include <pqxx/pqxx>
 
-StockData::StockData(size_t dataSize) :
+StockData::StockData(std::string symbol) :
 	BufferedDataReader(1),
-	_dataSize(dataSize),
+	_dataSize(1),
 	_dataOffset(0),
-	_label(1)
+	_predictionDistance(1),
+	_label(1),
+	_work(_conn),
+	_stock_id(idFromSymbol(symbol))
 {
-	prepareBuffer(); /* TODO: should be in BufferedDataReader? */
 }
 
 StockData::Vector_t StockData::readDataFromSource() {
 	Vector_t deltas = Vector_t::Zero(_dataSize);
 	Vector_t opens = Vector_t::Zero(_dataSize+2); // one extra open to get change, another extra to get label change
-	int month = 30; /* predict distance TODO: put somewhere */
 
-	pqxx::connection C;
-	//std::cout << "Connected to " << C.dbname() << "\n";
-	pqxx::work W(C);
-
-	pqxx::result R = W.exec("SELECT open FROM stockdaily WHERE stock_id=2401 ORDER BY date"); /* TODO: choose stock_id or symbol */
+	pqxx::result R = _work.exec("SELECT open FROM stockdaily WHERE stock_id=2401 ORDER BY date"); /* TODO: choose stock_id or symbol */
 
 	//std::cout << "Found " << R.size() << " stocks:\n";
 	R[_dataOffset]["open"].to(opens[0]); /* TODO: readResult() function */
@@ -29,7 +25,7 @@ StockData::Vector_t StockData::readDataFromSource() {
 		//deltas[i] = opens[i+1] - opens[i];
 		deltas[i] = opens[i+1] > opens[i] ? 1 : 0;
 	}
-	R[month+_dataOffset+_dataSize+1]["open"].to(opens[_dataSize+1]);
+	R[_predictionDistance+_dataOffset+_dataSize+1]["open"].to(opens[_dataSize+1]);
 	_label[0] = opens[_dataSize+1] > opens[_dataSize] ? 1 : 0;
 
 	//std::cout << opens << "\n";
@@ -61,6 +57,20 @@ std::string StockData::log() {
 	return "StockData";
 }
 
+void StockData::useTestSet() {
+
+}
+void StockData::useTrainSet() {
+	seek(0);
+}
 void StockData::seek(int pos) {
 	_dataOffset = pos;
 }
+
+long StockData::idFromSymbol(std::string symbol) {
+	pqxx::result R = _work.exec("SELECT id FROM stock WHERE symbol='" + _work.esc(symbol) + "'"); /* TODO: secure, escape symbol */ /* TODO: field names in variables */
+	long ret;
+	R[0][0].to(ret);
+	return ret;
+}	
+

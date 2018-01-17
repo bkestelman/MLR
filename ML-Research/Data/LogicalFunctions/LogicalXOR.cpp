@@ -33,6 +33,11 @@ const size_t LogicalXOR::labelSize() {
 	return 1;
 }
 
+void LogicalXOR::useTrainSet() {
+}
+void LogicalXOR::useTestSet() {
+}
+
 bool LogicalXOR::test(DataReader::Vector_t output) {
 	assert(output.size() == 1);
 	return abs(output[0] - label[0]) < 0.5;

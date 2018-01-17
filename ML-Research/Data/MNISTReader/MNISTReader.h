@@ -10,7 +10,9 @@ public:
 	MNISTReader(int dataSize);
 	const size_t dataSize() override;
 	const size_t labelSize() override;
-	void seek(int) override;
+	void useTestSet() override;
+	void useTrainSet() override;
+	void seek(int);
 	bool test(DataReader::Vector_t) override;
 	std::string log() override;
 	//const void testAssertions(const ANN&) override;
@@ -44,8 +46,8 @@ private:
 	void readHeaders();
 	void readHeaders(MNISTFile& file);	
 
-	int imageFileToRead();
-	int labelFileToRead();
+	int imageFileToRead;
+	int labelFileToRead;
 
 	std::ofstream _debug_log; 
 };

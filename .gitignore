@@ -268,3 +268,6 @@ __pycache__/
 *.bak
 /ML-Research/MLR
 /ML-Research/a.out
+TODO
+*.log
+Log.h

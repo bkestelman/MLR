@@ -8,7 +8,9 @@ ANN::ANN(DataReader& dr, ANNParams& params) :
 	_weights(),
 	_params(params),
 	_layerSizes(_params._layerSizes),
-	_log(_params)
+	_log(_params), 
+	_correct(0), 
+	_tests(0)
 {
 //	_dr.testAssertions(*this);
 }
@@ -45,7 +47,8 @@ ANN::Vector_t& ANN::test() {
 	_tests++;
 	readNext();
 	Eigen::VectorXd output = processInput();	
-	_trainLog << "\nLabel:\n" << _label << "\nOutput:\n" << output << "\n";
+	_trainLog << "\nInput:\n" << _input << "\n";
+	_trainLog << "Label:\n" << _label << "\nOutput:\n" << output << "\n";
 	if (_dr.test(output)) {
 		_correct++;
 		_trainLog << "Correct\n";
@@ -54,14 +57,16 @@ ANN::Vector_t& ANN::test() {
 	return _layers[outputLayer()];
 }
 void ANN::test(int tests) {
-	_dr.seek(_params._batchSize);
+	//_dr.seek(_params._batchSize); /* TODO: HIGH: replace low-level seek with _dr.useTestSet() */
+	_dr.useTestSet();
 	for(int i = 0; i < tests; i++) {
 		std::cout << "i: " << i << "\n";
 		test();
 	}
 }
 void ANN::testOnBatch() {
-	_dr.seek(0);
+	//_dr.seek(0); /* TODO: HIGH: replace low-level seek(0) with _dr.useTrainSet() */
+	_dr.useTrainSet();
 	for(int i = 0; i < _params._batchSize; i++) {
 		std::cout << "i: " << i << "\n";
 		test();

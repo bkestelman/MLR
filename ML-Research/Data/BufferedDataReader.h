@@ -16,4 +16,5 @@ protected:
 public:
 	Vector_t readData() override;
 	Vector_t readLabel() override;
+	void init() override;
 };	

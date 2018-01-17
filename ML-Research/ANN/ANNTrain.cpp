@@ -17,7 +17,8 @@ void ANN::train(int epochs) { /* DEPRECATED */
 	}
 }
 void ANN::trainBatch() {
-	_dr.seek(0);
+	//_dr.seek(0);
+	_dr.useTrainSet();
 	for(int i = 0; i < _params._batchSize; i++) {
 		std::cout << "i: " << i << "\n";
 		train();

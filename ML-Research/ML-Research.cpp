@@ -26,9 +26,13 @@ int main()
 	std::cout << "Hello World" << std::endl;
 	//std::ofstream os{ "out.log" };
 	MNISTReader mr(2);
-	//LogicalXOR xr = LogicalXOR();
-	//StockData S = StockData(30);
-	DataReader& dr = mr;
+	LogicalXOR xr = LogicalXOR();
+	StockData S("AMZN");
+	S._dataSize = 30;
+	S._predictionDistance = 30;
+	DataReader& dr = S;
+	dr.init();
+
 	std::vector<size_t> layerSizes({ dr.dataSize(), dr.labelSize() }); /* TODO: shove DataReader info
 									   into params through constructor*/
 	ANNParams params(layerSizes);
@@ -36,7 +40,7 @@ int main()
 	params.activationFunc_d = MLMath::sigmoid_d;
 	params._learningRate = 1;
 	params._initMatrix = MLMath::randMatrix;
-	params._batchSize = 1000;
+	params._batchSize = 10;
 	params._iterations = 1;
 	ANN ann(dr, params);
 	ann.insertLayer(1, 15);

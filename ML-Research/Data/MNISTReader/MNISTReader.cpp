@@ -37,32 +37,38 @@ MNISTReader::MNISTReader(int dataStep) : /* TODO: params struct */
 	_debug_log("mnist.log"),
 	_dataStep(dataStep),
 	_scaleDown(255),
-	_labelCounts(DataReader::Vector_t::Zero(10)) /* TODO: what is this */
+	_labelCounts(DataReader::Vector_t::Zero(10)), /* TODO: what is this */
+	imageFileToRead(TRAIN_IMAGES_FILE),
+	labelFileToRead(TRAIN_LABELS_FILE)
 {
 	setupFilenames();
 	setupHeaderCounts();
 	openStreams();
 	readHeaders();
-	BufferedDataReader::prepareBuffer();
 }
 
+void MNISTReader::useTestSet() {
+	imageFileToRead = TEST_IMAGES_FILE;
+	labelFileToRead = TEST_LABELS_FILE;
+	seek(0);
+}
+void MNISTReader::useTrainSet() {
+	imageFileToRead = TRAIN_IMAGES_FILE; /* TODO: useDataFile(file) */
+	labelFileToRead = TRAIN_LABELS_FILE;
+	seek(0);
+}
 void MNISTReader::seek(int pos) {
-	//int f = imageFileToRead();
-	int f = TRAIN_IMAGES_FILE;
-	MNISTFile& imageFile = MNISTFiles[f];
+	MNISTFile& imageFile = MNISTFiles[imageFileToRead]; /* TODO: should imageFileToRead just be an MNISTFile? */
 	std::cout << "seeking to " << imageFile.dataPos << " + " << pos*dataSize() << " * " << _dataStep << "\n";
 	imageFile.fstream.seekg(imageFile.dataPos + pos*dataSize()*_dataStep); 
 	std::cout << "tellg " << imageFile.fstream.tellg() << "\n";
-	//f = labelFileToRead();
-	f = TRAIN_LABELS_FILE;
-	MNISTFile& labelFile = MNISTFiles[f];
+	MNISTFile& labelFile = MNISTFiles[labelFileToRead];
 	labelFile.fstream.seekg(labelFile.dataPos + pos);
 	BufferedDataReader::prepareBuffer();
 }
 	
 DataReader::Vector_t MNISTReader::readDataFromSource() {
-	int f = imageFileToRead();
-	MNISTFile& file = MNISTFiles[f];
+	MNISTFile& file = MNISTFiles[imageFileToRead];
 	int length = dataSize()*_dataStep;
 	char* bytes = (char*)malloc(length);
 	file.fstream.read(bytes, length);
@@ -82,28 +88,16 @@ DataReader::Vector_t MNISTReader::readDataFromSource() {
 }
 
 DataReader::Vector_t MNISTReader::readLabelFromSource() {
-	int f = labelFileToRead();
 	char* byte = (char*)malloc(1);
-	MNISTFiles[f].fstream.read(byte, 1);
+	MNISTFiles[labelFileToRead].fstream.read(byte, 1);
 	assert(*byte >= 0 && *byte <= 9); 
 	DataReader::Vector_t label = DataReader::Vector_t::Zero(10);
 	label[*byte] = 1;
 	assert(label.size() == 10);
-	itemsRead++;
+	itemsRead++; /* DEPRECATED ? */
 	_labelCounts(*byte)++;
 	_label = label; // NEW
 	return label;
-}
-
-int MNISTReader::imageFileToRead() {
-	return TRAIN_IMAGES_FILE;
-	if (itemsRead < MNISTFiles[TRAIN_IMAGES_FILE].items) return TRAIN_IMAGES_FILE;
-	else return TEST_IMAGES_FILE;
-}
-int MNISTReader::labelFileToRead() {
-	return TRAIN_LABELS_FILE;
-	if (itemsRead < MNISTFiles[TRAIN_LABELS_FILE].items) return TRAIN_LABELS_FILE;
-	else return TEST_LABELS_FILE;
 }
 
 void MNISTReader::setupFilenames() {
