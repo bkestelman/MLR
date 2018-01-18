@@ -1,7 +1,6 @@
 #pragma once
 #include<Eigen/Dense>
 
-class ANN;
 class DataReader {
 public:
 	using Vector_t = Eigen::VectorXd;

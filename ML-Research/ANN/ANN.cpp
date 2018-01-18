@@ -8,8 +8,8 @@ ANN::ANN(DataReader& dr, ANNParams& params) :
 	_weights(),
 	_params(params),
 	_layerSizes(_params._layerSizes),
-	_log(_params), 
 	_correct(0), 
+	_trains(0),
 	_tests(0)
 {
 //	_dr.testAssertions(*this);
@@ -100,10 +100,10 @@ void ANN::insertLayer(size_t layer, size_t size) {
 	//setupLayer(layer);
 }
 
-void ANN::log(std::string file) {
-	_log.extraLog(_dr.log());
-	_log.log(file, _correct, _tests, _trains); /* TODO: use results struct */
-}
+//void ANN::log(std::string file) {
+//	_log.extraLog(_dr.log());
+//	_log.log(file, _correct, _tests, _trains); /* TODO: use results struct */
+//}
 
 int ANN::correct() {
 	return _correct;

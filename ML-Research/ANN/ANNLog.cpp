@@ -6,8 +6,9 @@
 #include<ctime>
 #include<time.h>
 
-ANNLog::ANNLog(ANNParams& params) :
-	_params(params),
+ANNLog::ANNLog(ANN& ann) :
+	_ann(ann),
+	_params(ann._params),
 	functionNames()
 {
 	/* TODO: move to external file? */
@@ -27,11 +28,6 @@ ANNLog::ANNLog(ANNParams& params) :
 	/* TODO: typedef the cast to void(*)() */
 }
 
-
-ANNLog::~ANNLog()
-{
-}
-
 std::ostream& operator<<(std::ostream& os, ANNLog& log) { /* TODO: why can't log be const? maybe map operator[] is not const... */
 	os << "Learning Rate: " << log._params._learningRate << "\n";
 	os << "Activation Function: " << log.functionNames[(void(*)())log._params.activationFunc] << "\n";
@@ -42,7 +38,7 @@ std::ostream& operator<<(std::ostream& os, ANNLog& log) { /* TODO: why can't log
 	return os;
 }
 
-void ANNLog::log(std::string file, int correct, int tests, int trains) { /* TODO: use ANNResults struct */
+void ANNLog::log(std::string file) { /* TODO: use ANNResults struct */
 	std::ofstream out{ file, std::ofstream::app };
 	out << "\n";
 	/* TODO: clean up clock stuff */
@@ -53,14 +49,14 @@ void ANNLog::log(std::string file, int correct, int tests, int trains) { /* TODO
 	ctime(date);
 	out << date << "\n";
 	out << "Layer sizes: { ";
-	for (size_t l = 0; l < _params._layerSizes.size(); l++) {
-		out << _params._layerSizes[l] << ", ";
+	for (size_t l = 0; l < _ann._layerSizes.size(); l++) {
+		out << _ann._layerSizes[l] << ", ";
 	}
 	out << "}\n";
 	out << *this << "\n";
-	out << _extraLog << "\n\n";
-	out << "Correct: " << correct << "/" << tests << "\n";
-	out << "After " << trains << " training runs " << "\n";
+	out << _ann._dr.log() << "\n"; /* TODO: os << _ann._dr; */
+	out << "Correct: " << _ann._correct << "/" << _ann._tests << "\n";
+	out << "After " << _ann._trains << " training runs " << "\n";
 	out << "-------------------------------\n" << std::endl;
 	out.close();
 }

@@ -6,18 +6,17 @@
 #include "Data/LogicalFunctions/LogicalAND.h"
 #include "Data/MNISTReader/MNISTReader.h"
 #include "MLMath.h"
-#include "ANNLog.h"
 #include "ANNParams.h"
 
+class ANNLog;
 class ANN {
+	friend ANNLog;
 public:
 	using Matrix_t = Eigen::MatrixXd;
 	using Vector_t = Eigen::VectorXd;
 	using val_t = double;
 
 	ANNParams _params;
-
-	ANNLog _log;
 
 	explicit ANN(const std::vector<size_t>& layerSizes);
 	//explicit ANN(DataReader& dr); /* ANN based off DataReader with no hidden layers */
@@ -38,7 +37,7 @@ public:
 	void insertLayer(size_t layer, size_t size);
 	Vector_t layer(size_t l) { return _layers[l]; };
 
-	void log(std::string file);
+	//void log(std::string file); /* DEPRECATED */
 	int correct();
 
 	/* ANN Operator Overloads */
@@ -51,13 +50,11 @@ private:
 	DataReader& _dr;
 	Vector_t _input; /* set by readNext() */
 	Vector_t _label; /* set by readNext() */
-	std::vector<size_t>& _layerSizes;
+	std::vector<size_t> _layerSizes;
 	std::vector<Vector_t> _layers;
 public:
 	std::vector<Matrix_t> _weights;
 	std::vector<Matrix_t> _weightsDeltas;
-	//std::vector<Vector_t> _biases; /* TODO: make private */
-	//std::vector<Vector_t> _biasesDeltas; /* TODO: make private */
 private:
 	int _correct;
 	int _tests;
@@ -102,5 +99,6 @@ private:
 	void scale(Vector_t& vec);
 
 	std::ofstream _trainLog{ "out.log" };
+
 
 };
