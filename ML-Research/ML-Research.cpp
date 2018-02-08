@@ -36,7 +36,7 @@ int main()
 	StockData S("AMZN");
 	S._dataSize = 30;
 	S._predictionDistance = 30;
-	DataReader& dr = S;
+	DataReader& dr = mr;
 	dr.init();
 
 	std::vector<size_t> layerSizes({ dr.dataSize(), dr.labelSize() }); /* TODO: shove DataReader info
@@ -46,16 +46,16 @@ int main()
 	params.activationFunc_d = MLMath::sigmoid_d;
 	params._learningRate = 1;
 	params._initMatrix = MLMath::randMatrix;
-	params._batchSize = 50;
+	params._batchSize = 10000;
 	params._iterations = 1;
-	for(int i = 0; i < 10; i++) {
+	for(int i = 0; i < 1; i++) {
 		ANN ann(dr, params);
 		ann.insertLayer(1, 15);
 		ann.init();
-		ann.trainBatch(10);
+		ann.trainBatch(1);
 		std::cout << "Testing\n";
 		//ann.testOnBatch();
-		ann.test(100);
+		ann.test(1000);
 		ANNLog log{ann};
 		log.log("ann.log");
 	}
